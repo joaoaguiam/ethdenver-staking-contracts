@@ -45,11 +45,14 @@ contract ETHDenverStaking is Ownable, Pausable {
     function stake(address _userAddress, uint _expiringDate, bytes _signature) public payable {
         bytes32 hashMessage = keccak256(abi.encodePacked(_userAddress, msg.value, _expiringDate));
         address signer = hashMessage.toEthSignedMessageHash().recover(_signature);
+        // emit debugAddress(signer);
+        // emit debugAddress(authorizedStakeGrantAddress);
+        
         require(signer == authorizedStakeGrantAddress, "Signature is not valid");
 
         require(_expiringDate > block.timestamp, "Grant is expired");
 
-        require(userStakedAddress[_userAddress] != 0, "User has already stake!");
+        require(userStakedAddress[_userAddress] == 0, "User has already stake!");
 
         stakedAmount[_userAddress] = msg.value;
         userStakedAddress[_userAddress] = msg.sender;

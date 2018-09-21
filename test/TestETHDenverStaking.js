@@ -44,10 +44,10 @@ contract("ETHDenverStaking", async function (accounts) {
         })*/
         it("basic test", async function () {
             let owner = accounts[0];
-            let signature = "0xbbe6499d1089a9695323a64e6df40a66700fbabbdfa845dcde22dd301afe072c5ea0a666226e550731894a61ab4b49283abe1ae60c25c556bb117312366e8eb51c"
+            let signature = "0xc940808d99c8cbb1d62fa02cc22164e0c42b153ba45cf6a9fcd259b8eabf85b64d477fa5173a8f31a4f7b999f274440a213e67f4af9c43730c6a4ccf49ce2df01b"
             let userAddress = "0xee7e80908d1c146495acbd40a20f35d1a9571219";
-            let amountStaked = 970000000000000000;
-            let expiringDate = 1537591303;
+            let amountStaked = 97000000000000000;
+            let expiringDate = 1537598371;
 
             let ethDenverStakingContract = await ETHDenverStaking.deployed();
             // prettyPrint(ethDenverStakingContract.address);
