@@ -52,7 +52,7 @@ contract ETHDenverStaking is Ownable, Pausable {
 
         require(_expiringDate > block.timestamp, "Grant is expired");
 
-        require(userStakedAddress[_userAddress] == 0, "User has already stake!");
+        // require(userStakedAddress[_userAddress] == 0, "User has already stake!");
 
         stakedAmount[_userAddress] = msg.value;
         userStakedAddress[_userAddress] = msg.sender;
