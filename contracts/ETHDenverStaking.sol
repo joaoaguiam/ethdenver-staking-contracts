@@ -13,6 +13,7 @@ contract ETHDenverStaking is Ownable, Pausable {
     using ECRecovery for bytes32;
 
     event UserStake(address userAddress, address stakedBy, uint amountStaked);
+    event UserRecoupStake(address userAddress, address stakedBy, uint amountStaked);
 
     // Debug events
     event debugBytes32(bytes32 _msg);
@@ -30,8 +31,7 @@ contract ETHDenverStaking is Ownable, Pausable {
     mapping (address => address) public userStakedAddress; 
 
     // Mapping containing the amount staked for a given userAddress (uPort address)
-    mapping (address => uint) public stakedAmount;
-
+    mapping (address => uint256) public stakedAmount;
 
     function setAuthorizedStakeGrantAddress(address _signer) public onlyOwner {
         authorizedStakeGrantAddress = _signer;
@@ -59,5 +59,29 @@ contract ETHDenverStaking is Ownable, Pausable {
 
         emit UserStake(_userAddress, msg.sender, msg.value);
     }
+
+    // function allow the staking for a participant
+    function recoupStake(address _userAddress, uint _expiringDate, bytes _signature) public {
+        bytes32 hashMessage = keccak256(abi.encodePacked(_userAddress, _expiringDate));
+        address signer = hashMessage.toEthSignedMessageHash().recover(_signature);
+        // emit debugAddress(signer);
+        // emit debugAddress(authorizedStakeGrantAddress);
+        
+        require(signer == authorizedRecoupStakeGrantAddress, "Signature is not valid");
+
+        require(_expiringDate > block.timestamp, "Grant is expired");
+
+        require(userStakedAddress[_userAddress] != 0, "User has not stake!");
+
+        address stakedBy = userStakedAddress[_userAddress];
+        
+        uint256 stakedAmount = stakedAmount[_userAddress];
+        
+        stakedBy.transfer(stakedAmount);
+
+        emit UserRecoupStake(_userAddress, stakedBy, stakedAmount);
+    }
+
+    
     
 }

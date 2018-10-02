@@ -1,7 +1,7 @@
 {
   "name": "ethdenver-staking-contracts",
   "version": "1.0.0",
-  "description": "Contracts to manage the staking for the ETH Denver applications",
+  "description": "Contracts to manage the staking for the ETHDenver applications",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
