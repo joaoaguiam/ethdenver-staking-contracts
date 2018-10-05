@@ -75,11 +75,11 @@ contract ETHDenverStaking is Ownable, Pausable {
 
         address stakedBy = userStakedAddress[_userAddress];
         
-        uint256 stakedAmount = stakedAmount[_userAddress];
+        uint256 amount = stakedAmount[_userAddress];
         
-        stakedBy.transfer(stakedAmount);
+        stakedBy.transfer(amount);
 
-        emit UserRecoupStake(_userAddress, stakedBy, stakedAmount);
+        emit UserRecoupStake(_userAddress, stakedBy, amount);
     }
 
     
