@@ -8,12 +8,12 @@ import "../node_modules/zeppelin-solidity/contracts/ECRecovery.sol";
 
 
 contract ETHDenverStaking is Ownable, Pausable {
-  
+
     using SafeMath for uint256;
     using ECRecovery for bytes32;
 
-    event UserStake(address userAddress, address stakedBy, uint amountStaked);
-    event UserRecoupStake(address userAddress, address stakedBy, uint amountStaked);
+    event UserStake(address userUportAddress, address userMetamaskAddress, uint amountStaked);
+    event UserRecoupStake(address userUportAddress, address userMetamaskAddress, uint amountStaked);
 
     // Debug events
     event debugBytes32(bytes32 _msg);
@@ -21,67 +21,69 @@ contract ETHDenverStaking is Ownable, Pausable {
     event debugString(string _msg);
     event debugAddress(address _address);
 
-    // signer authorized to allow staking
-    address public authorizedStakeGrantAddress = 0xc1E19BDD3DBBA6c070579083E3B0D4C92fcaE0B3;
-    
-    // signer authorized to allow the recouping staked amount
-    address public authorizedRecoupStakeGrantAddress = 0xc1E19BDD3DBBA6c070579083E3B0D4C92fcaE0B3;
+    // ETHDenver will need to authorize staking and recouping.
+    address public grantSigner;
 
-    // Mapping associating the userAddress (uPort address) with the wallet (metamask address) that has staked for him
-    mapping (address => address) public userStakedAddress; 
+    // End of the event, when staking can be sweeped
+    uint public finishDate;
 
-    // Mapping containing the amount staked for a given userAddress (uPort address)
+    // metamaskAddress => uPortAddress
+    mapping (address => address) public userStakedAddress;
+
+    // ETH amount staked by a given uPort address
     mapping (address => uint256) public stakedAmount;
 
-    function setAuthorizedStakeGrantAddress(address _signer) public onlyOwner {
-        authorizedStakeGrantAddress = _signer;
+
+    constructor(address _grantSigner, uint _finishDate) public {
+        grantSigner = _grantSigner;
+        finishDate = _finishDate;
     }
 
-    function setAuthorizedRecoupStakeGrantAddress(address _signer) public onlyOwner {
-        authorizedRecoupStakeGrantAddress = _signer;
+    // Public functions
+
+    // function allow the staking for a participant
+    function stake(address _userUportAddress, uint _expiryDate, bytes _signature) public payable {
+        bytes32 hashMessage = keccak256(abi.encodePacked(_userUportAddress, msg.value, _expiryDate));
+        address signer = hashMessage.toEthSignedMessageHash().recover(_signature);
+
+        require(signer == grantSigner, "Signature is not valid");
+        require(block.timestamp < _expiryDate, "Grant is expired");
+        require(userStakedAddress[_userUportAddress] == 0, "User has already staked!");
+
+        userStakedAddress[_userUportAddress] = msg.sender;
+        stakedAmount[_userUportAddress] = msg.value;
+
+        emit UserStake(_userUportAddress, msg.sender, msg.value);
     }
 
     // function allow the staking for a participant
-    function stake(address _userAddress, uint _expiringDate, bytes _signature) public payable {
-        bytes32 hashMessage = keccak256(abi.encodePacked(_userAddress, msg.value, _expiringDate));
+    function recoupStake(address _userUportAddress, uint _expiryDate, bytes _signature) public {
+        bytes32 hashMessage = keccak256(abi.encodePacked(_userUportAddress, _expiryDate));
         address signer = hashMessage.toEthSignedMessageHash().recover(_signature);
-        // emit debugAddress(signer);
-        // emit debugAddress(authorizedStakeGrantAddress);
-        
-        require(signer == authorizedStakeGrantAddress, "Signature is not valid");
 
-        require(_expiringDate > block.timestamp, "Grant is expired");
+        require(signer == grantSigner, "Signature is not valid");
+        require(block.timestamp < _expiryDate, "Grant is expired");
+        require(userStakedAddress[_userUportAddress] != 0, "User has not staked!");
 
-        // require(userStakedAddress[_userAddress] == 0, "User has already stake!");
+        address stakedBy = userStakedAddress[_userUportAddress];
+        uint256 amount = stakedAmount[_userUportAddress];
+        stakedAmount[_userUportAddress] = 0;
 
-        stakedAmount[_userAddress] = msg.value;
-        userStakedAddress[_userAddress] = msg.sender;
-
-        emit UserStake(_userAddress, msg.sender, msg.value);
-    }
-
-    // function allow the staking for a participant
-    function recoupStake(address _userAddress, uint _expiringDate, bytes _signature) public {
-        bytes32 hashMessage = keccak256(abi.encodePacked(_userAddress, _expiringDate));
-        address signer = hashMessage.toEthSignedMessageHash().recover(_signature);
-        // emit debugAddress(signer);
-        // emit debugAddress(authorizedStakeGrantAddress);
-        
-        require(signer == authorizedRecoupStakeGrantAddress, "Signature is not valid");
-
-        require(_expiringDate > block.timestamp, "Grant is expired");
-
-        require(userStakedAddress[_userAddress] != 0, "User has not stake!");
-
-        address stakedBy = userStakedAddress[_userAddress];
-        
-        uint256 amount = stakedAmount[_userAddress];
-        
         stakedBy.transfer(amount);
 
         emit UserRecoupStake(_userAddress, stakedBy, amount);
     }
 
-    
-    
+    // Owner functions
+
+    function setGrantSigner(address _signer) public onlyOwner {
+        require(_signer != address(0x0), "address is null");
+        grantSigner = _signer;
+    }
+
+    function sweepStakes() public onlyOwner {
+        require(block.timestamp > finishDate, "EthDenver is not over yet!");
+        owner().transfer(this.balance);
+    }
+
 }
