@@ -27,7 +27,7 @@ contract ETHDenverStaking is Ownable, Pausable {
     // End of the event, when staking can be sweeped
     uint public finishDate;
 
-    // metamaskAddress => uPortAddress
+    // uPortAddress => walletAddress
     mapping (address => address) public userStakedAddress;
 
     // ETH amount staked by a given uPort address
