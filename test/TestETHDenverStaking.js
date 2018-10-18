@@ -1,41 +1,10 @@
 var ETHDenverStaking = artifacts.require("ETHDenverStaking");
 
-const prettyPrint = obj => console.log(JSON.stringify(obj, null, 2));
-const Web3 = require('web3');
 const abi = require('ethereumjs-abi')
 const BN = require('bn.js')
 const pify = require('pify');
 
 const ethAsync = pify(web3.eth);
-
-
-let toAscii = function (str) {
-    return web3.toAscii(str).replace(/\u0000/g, '');
-}
-
-let getEvent = function (logs, eventName) {
-    let size = logs.length;
-    for (i = 0; i < size; i++) {
-        if (logs[i].event == eventName) {
-            return logs[i];
-        }
-    }
-}
-
-let countEvents = function (logs, eventName) {
-    let size = logs.length;
-    let count = 0;
-    for (i = 0; i < size; i++) {
-        if (logs[i].event == eventName) {
-            count++;
-        }
-    }
-    return count;
-}
-
-let isEVMException = function (err) {
-    return err.toString().includes('revert');
-}
 
 const assertRevert = async (promise) => {
     try {
@@ -86,9 +55,6 @@ const generateRecoupStakeGrant = (signer, userAddress, validity = 60 * 60 * 24) 
         throw exception;
     }
 };
-
-
-
 
 contract("ETHDenverStaking", async function (accounts) {
     let owner = accounts[0];
