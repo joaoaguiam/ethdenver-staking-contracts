@@ -42,7 +42,7 @@ contract ETHDenverStaking is Ownable, Pausable {
     // Public functions
 
     // function allow the staking for a participant
-    function stake(address _userUportAddress, uint _expiryDate, bytes _signature) public payable {
+    function stake(address _userUportAddress, uint _expiryDate, bytes _signature) public payable whenNotPaused {
         bytes32 hashMessage = keccak256(abi.encodePacked(_userUportAddress, msg.value, _expiryDate));
         address signer = hashMessage.toEthSignedMessageHash().recover(_signature);
 
@@ -57,7 +57,7 @@ contract ETHDenverStaking is Ownable, Pausable {
     }
 
     // function allow the staking for a participant
-    function recoupStake(address _userUportAddress, uint _expiryDate, bytes _signature) public {
+    function recoupStake(address _userUportAddress, uint _expiryDate, bytes _signature) public whenNotPaused {
         bytes32 hashMessage = keccak256(abi.encodePacked(_userUportAddress, _expiryDate));
         address signer = hashMessage.toEthSignedMessageHash().recover(_signature);
 
