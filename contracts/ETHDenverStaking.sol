@@ -71,7 +71,7 @@ contract ETHDenverStaking is Ownable, Pausable {
 
         stakedBy.transfer(amount);
 
-        emit UserRecoupStake(_userAddress, stakedBy, amount);
+        emit UserRecoupStake(_userUportAddress, stakedBy, amount);
     }
 
     // Owner functions
@@ -83,7 +83,7 @@ contract ETHDenverStaking is Ownable, Pausable {
 
     function sweepStakes() public onlyOwner {
         require(block.timestamp > finishDate, "EthDenver is not over yet!");
-        owner().transfer(this.balance);
+        owner.transfer(address(this).balance);
     }
 
 }
