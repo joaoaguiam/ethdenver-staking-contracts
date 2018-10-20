@@ -193,8 +193,37 @@ contract("ETHDenverStaking", async function (accounts) {
         it("without being an owner fails", async function () {
             await assertRevert(this.contract.setGrantSigner(changedSigner, { from: sender }));
         });
+    });
 
+    describe('ETHDenverStaking - pausable', () => {
 
+        it("stake fails when paused", async function () {
+            await this.contract.pause({ from: owner });
+            await assertRevert(this.contract.stake(userAddress, this.grant.expiringDate, this.grant.signature, { from: staker, value: this.grant.amountStake }));
+        });
+
+        it("recoup stake fails when paused", async function () {
+            const recoupGrant = generateRecoupStakeGrant(signer, userAddress);
+            await this.contract.stake(userAddress, this.grant.expiringDate, this.grant.signature, { from: staker, value: this.grant.amountStake });
+            await this.contract.pause({ from: owner });
+            await assertRevert(this.contract.recoupStake(userAddress, recoupGrant.expiringDate, recoupGrant.signature, { from: staker }));
+        });
+
+        it("stake success when unpaused", async function () {
+            await this.contract.pause({ from: owner });
+            await assertRevert(this.contract.stake(userAddress, this.grant.expiringDate, this.grant.signature, { from: staker, value: this.grant.amountStake }));
+            await this.contract.unpause({ from: owner });
+            await this.contract.stake(userAddress, this.grant.expiringDate, this.grant.signature, { from: staker, value: this.grant.amountStake });
+        });
+
+        it("recoup stake success when unpaused", async function () {
+            const recoupGrant = generateRecoupStakeGrant(signer, userAddress);
+            await this.contract.stake(userAddress, this.grant.expiringDate, this.grant.signature, { from: staker, value: this.grant.amountStake });
+            await this.contract.pause({ from: owner });
+            await assertRevert(this.contract.recoupStake(userAddress, recoupGrant.expiringDate, recoupGrant.signature, { from: staker }));
+            await this.contract.unpause({ from: owner });
+            await this.contract.recoupStake(userAddress, recoupGrant.expiringDate, recoupGrant.signature, { from: staker });
+        });
     });
 });
 
