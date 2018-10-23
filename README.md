@@ -43,3 +43,6 @@ Only the `owner` should be able to:
 The contract implements Pausable. This will stop `stake` and `recoup`, but not `setGrantSigner` or `sweetStakes`.
 SafeMath, Ownable, and ECRecovery libraries are also used, taken from open-zepplin.
 
+
+Contract is (here)[https://github.com/joaoaguiam/ethdenver-staking-contracts/blob/master/contracts/ETHDenverStaking.sol]
+Full flattened contract with all dependencies included (here)[https://github.com/joaoaguiam/ethdenver-staking-contracts/blob/master/contracts_flat/ETHDenverStaking_flat.sol] (easy for remix)
