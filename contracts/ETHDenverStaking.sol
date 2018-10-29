@@ -1,15 +1,12 @@
 pragma solidity ^0.4.25;
 
 import "../node_modules/zeppelin-solidity/contracts/lifecycle/Pausable.sol";
-
 import "../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../node_modules/zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../node_modules/zeppelin-solidity/contracts/ECRecovery.sol";
 
 
 contract ETHDenverStaking is Ownable, Pausable {
 
-    using SafeMath for uint256;
     using ECRecovery for bytes32;
 
     event UserStake(address userUportAddress, address userMetamaskAddress, uint amountStaked);
@@ -31,10 +28,12 @@ contract ETHDenverStaking is Ownable, Pausable {
     mapping (address => address) public userStakedAddress;
 
     // ETH amount staked by a given uPort address
-    mapping (address => uint256) public stakedAmount;
+    mapping (address => uint) public stakedAmount;
 
 
     constructor(address _grantSigner, uint _finishDate) public {
+        require(_grantSigner != address(0x0));
+        require(_finishDate > block.timestamp);
         grantSigner = _grantSigner;
         finishDate = _finishDate;
     }
@@ -66,7 +65,7 @@ contract ETHDenverStaking is Ownable, Pausable {
         require(userStakedAddress[_userUportAddress] != 0, "User has not staked!");
 
         address stakedBy = userStakedAddress[_userUportAddress];
-        uint256 amount = stakedAmount[_userUportAddress];
+        uint amount = stakedAmount[_userUportAddress];
         userStakedAddress[_userUportAddress] = address(0x0);
         stakedAmount[_userUportAddress] = 0;
 

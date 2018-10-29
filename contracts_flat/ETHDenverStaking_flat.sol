@@ -118,60 +118,6 @@ contract Pausable is Ownable {
 
 
 
-
-/**
- * @title SafeMath
- * @dev Math operations with safety checks that throw on error
- */
-library SafeMath {
-
-  /**
-  * @dev Multiplies two numbers, throws on overflow.
-  */
-  function mul(uint256 _a, uint256 _b) internal pure returns (uint256 c) {
-    // Gas optimization: this is cheaper than asserting 'a' not being zero, but the
-    // benefit is lost if 'b' is also tested.
-    // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-    if (_a == 0) {
-      return 0;
-    }
-
-    c = _a * _b;
-    assert(c / _a == _b);
-    return c;
-  }
-
-  /**
-  * @dev Integer division of two numbers, truncating the quotient.
-  */
-  function div(uint256 _a, uint256 _b) internal pure returns (uint256) {
-    // assert(_b > 0); // Solidity automatically throws when dividing by 0
-    // uint256 c = _a / _b;
-    // assert(_a == _b * c + _a % _b); // There is no case in which this doesn't hold
-    return _a / _b;
-  }
-
-  /**
-  * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
-  */
-  function sub(uint256 _a, uint256 _b) internal pure returns (uint256) {
-    assert(_b <= _a);
-    return _a - _b;
-  }
-
-  /**
-  * @dev Adds two numbers, throws on overflow.
-  */
-  function add(uint256 _a, uint256 _b) internal pure returns (uint256 c) {
-    c = _a + _b;
-    assert(c >= _a);
-    return c;
-  }
-}
-
-
-
-
 /**
  * @title Elliptic curve signature operations
  * @dev Based on https://gist.github.com/axic/5b33912c6f61ae6fd96d6c4a47afde6d
@@ -246,7 +192,6 @@ library ECRecovery {
 
 contract ETHDenverStaking is Ownable, Pausable {
 
-    using SafeMath for uint256;
     using ECRecovery for bytes32;
 
     event UserStake(address userUportAddress, address userMetamaskAddress, uint amountStaked);
@@ -268,10 +213,12 @@ contract ETHDenverStaking is Ownable, Pausable {
     mapping (address => address) public userStakedAddress;
 
     // ETH amount staked by a given uPort address
-    mapping (address => uint256) public stakedAmount;
+    mapping (address => uint) public stakedAmount;
 
 
     constructor(address _grantSigner, uint _finishDate) public {
+        require(_grantSigner != address(0x0));
+        require(_finishDate > block.timestamp);
         grantSigner = _grantSigner;
         finishDate = _finishDate;
     }
@@ -303,7 +250,7 @@ contract ETHDenverStaking is Ownable, Pausable {
         require(userStakedAddress[_userUportAddress] != 0, "User has not staked!");
 
         address stakedBy = userStakedAddress[_userUportAddress];
-        uint256 amount = stakedAmount[_userUportAddress];
+        uint amount = stakedAmount[_userUportAddress];
         userStakedAddress[_userUportAddress] = address(0x0);
         stakedAmount[_userUportAddress] = 0;
 

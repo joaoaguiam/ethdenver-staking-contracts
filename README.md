@@ -29,7 +29,7 @@ A similar process is used for recouping a stake. See [here](https://openzeppelin
 
 Upon staking, we track the `msg.sender` and map it back to the the user's uPort address (provided by the server), as well as track the amount they staked, so it can be easily returned.
 
-This way, upon arrival at ETHDenver, when the user proves their attendance, no interaction with metamask is required, they only need to prove their identity with uPort, and the funds will be automatically sent back to the original Metmask.
+This way, upon arrival at ETHDenver, when the user proves their attendance, no interaction with metamask is required, they only need to prove their identity with uPort, and the funds will be automatically sent back to the original Metamask.
 
 ## Owner functionality
 
